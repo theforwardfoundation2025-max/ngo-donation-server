@@ -33,42 +33,130 @@ app.post('/webhook/razorpay', async (req, res) => {
 
 async function sendEmail(d) {
   const html = `
-  <div style='font-family:Arial;max-width:600px;margin:auto;border:1px solid #ddd'>
-    <div style='background:#1a237e;padding:28px;text-align:center'>
-      <h2 style='color:white;margin:0'>Thank You for Your Donation!</h2>
-    </div>
-    <div style='padding:28px;background:#fafafa'>
-      <p>Dear <b>${d.name}</b>,</p>
-      <p>Your generous donation has been received. Thank you for supporting our mission!</p>
-      <h3 style='color:#1a237e'>Donation Receipt</h3>
-      <table style='width:100%;border-collapse:collapse'>
-        <tr style='background:#f0f4ff'>
-          <td style='padding:8px;border:1px solid #ddd'><b>Payment ID</b></td>
-          <td style='padding:8px;border:1px solid #ddd'>${d.payId}</td>
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+<div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;">
+
+  <!-- HEADER WITH LOGO -->
+  <div style="background:#1a1a1a;padding:28px 24px;text-align:center;">
+    <img src="https://github.com/theforwardfoundation2025-max/ngo-donation-server/blob/main/logo.png"
+         style="height:70px;margin-bottom:8px;"
+         alt="The Forward Foundation" />
+    <p style="color:#8BC34A;margin:4px 0 0;font-size:12px;letter-spacing:1px;">LIVE | DEVELOP | SUSTAIN</p>
+  </div>
+
+  <!-- GREEN THANK YOU BANNER -->
+  <div style="background:#E8F5E9;padding:16px 24px;text-align:center;border-left:4px solid #2E7D32;">
+    <p style="margin:0;font-size:16px;font-weight:600;color:#1B5E20;">Thank You for Your Generous Donation!</p>
+    <p style="margin:4px 0 0;font-size:13px;color:#2E7D32;">Your contribution helps us Live, Develop and Sustain communities.</p>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div style="padding:28px 24px;">
+    <p style="margin:0 0 16px;font-size:15px;color:#212121;">Dear <strong>${d.name}</strong>,</p>
+    <p style="margin:0 0 24px;font-size:14px;color:#424242;line-height:1.7;">
+      We are deeply grateful for your generous contribution to The Forward Foundation.
+      Your support directly powers our mission of protecting water, planting trees,
+      and uplifting communities across India.
+    </p>
+
+    <!-- RECEIPT TABLE -->
+    <div style="background:#F9F9F9;border-radius:8px;padding:20px;margin-bottom:24px;">
+      <p style="margin:0 0 14px;font-size:12px;font-weight:600;color:#333;text-transform:uppercase;letter-spacing:0.8px;">Donation Receipt</p>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:1px solid #E0E0E0;">
+          <td style="padding:10px 8px;color:#757575;width:45%;">Receipt Number</td>
+          <td style="padding:10px 8px;color:#212121;font-weight:600;">TFF-${new Date().getFullYear()}-${d.payId.slice(-6).toUpperCase()}</td>
         </tr>
-        <tr>
-          <td style='padding:8px;border:1px solid #ddd'><b>Date</b></td>
-          <td style='padding:8px;border:1px solid #ddd'>${d.date}</td>
+        <tr style="border-bottom:1px solid #E0E0E0;background:#ffffff;">
+          <td style="padding:10px 8px;color:#757575;">Payment ID</td>
+          <td style="padding:10px 8px;color:#212121;font-family:monospace;font-size:12px;">${d.payId}</td>
         </tr>
-        <tr style='background:#f0f4ff'>
-          <td style='padding:8px;border:1px solid #ddd'><b>Amount</b></td>
-          <td style='padding:8px;border:1px solid #ddd'><b>INR ${d.amount}</b></td>
+        <tr style="border-bottom:1px solid #E0E0E0;">
+          <td style="padding:10px 8px;color:#757575;">Date</td>
+          <td style="padding:10px 8px;color:#212121;">${d.date}</td>
         </tr>
-        <tr>
-          <td style='padding:8px;border:1px solid #ddd'><b>Purpose</b></td>
-          <td style='padding:8px;border:1px solid #ddd'>${d.purpose}</td>
+        <tr style="border-bottom:1px solid #E0E0E0;background:#ffffff;">
+          <td style="padding:10px 8px;color:#757575;">Donor Name</td>
+          <td style="padding:10px 8px;color:#212121;">${d.name}</td>
         </tr>
-        <tr style='background:#f0f4ff'>
-          <td style='padding:8px;border:1px solid #ddd'><b>PAN</b></td>
-          <td style='padding:8px;border:1px solid #ddd'>${d.pan}</td>
+        <tr style="border-bottom:1px solid #E0E0E0;">
+          <td style="padding:10px 8px;color:#757575;">PAN Number</td>
+          <td style="padding:10px 8px;color:#212121;font-family:monospace;">${d.pan}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #E0E0E0;background:#ffffff;">
+          <td style="padding:10px 8px;color:#757575;">Purpose</td>
+          <td style="padding:10px 8px;color:#212121;">${d.purpose}</td>
+        </tr>
+        <tr style="background:#F1F8E9;">
+          <td style="padding:14px 8px;color:#2E7D32;font-weight:700;font-size:15px;">Amount Donated</td>
+          <td style="padding:14px 8px;color:#2E7D32;font-weight:700;font-size:18px;">INR ${d.amount}</td>
         </tr>
       </table>
-      <p style='color:#555;margin-top:16px'>This donation qualifies for tax deduction under Section 80G.</p>
     </div>
-    <div style='background:#1a237e;padding:12px;text-align:center'>
-      <p style='color:#BBDEFB;font-size:12px;margin:0'>The Forward Foundation | theforwardfoundation2025@gmail.com</p>
+
+    <!-- 80G BOX -->
+    <div style="background:#E8F5E9;border-left:4px solid #388E3C;padding:14px 16px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+      <p style="margin:0;font-size:13px;color:#1B5E20;font-weight:600;">80G Tax Exemption Certificate</p>
+      <p style="margin:6px 0 0;font-size:12px;color:#2E7D32;line-height:1.6;">
+        This donation is eligible for tax deduction under <strong>Section 80G</strong>
+        of the Income Tax Act, 1961. Our 80G Registration No:
+        <strong>YOUR-80G-NUMBER-HERE</strong>.
+        Please retain this receipt for your tax records.
+      </p>
     </div>
-  </div>`;
+
+    <!-- IMPACT STATS -->
+    <div style="text-align:center;padding:20px 0;border-top:1px solid #E0E0E0;border-bottom:1px solid #E0E0E0;margin-bottom:24px;">
+      <p style="margin:0 0 16px;font-size:11px;color:#9E9E9E;text-transform:uppercase;letter-spacing:0.8px;">Our Impact So Far</p>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="text-align:center;padding:0 4px;">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#388E3C;">95M+</p>
+            <p style="margin:3px 0 0;font-size:10px;color:#9E9E9E;">Litres of<br/>water saved</p>
+          </td>
+          <td style="text-align:center;padding:0 4px;">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#388E3C;">40,000+</p>
+            <p style="margin:3px 0 0;font-size:10px;color:#9E9E9E;">Saplings<br/>planted</p>
+          </td>
+          <td style="text-align:center;padding:0 4px;">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#388E3C;">82,000+</p>
+            <p style="margin:3px 0 0;font-size:10px;color:#9E9E9E;">Lives<br/>impacted</p>
+          </td>
+          <td style="text-align:center;padding:0 4px;">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#388E3C;">120+</p>
+            <p style="margin:3px 0 0;font-size:10px;color:#9E9E9E;">Rain-to-tap<br/>schools</p>
+          </td>
+          <td style="text-align:center;padding:0 4px;">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#388E3C;">6+</p>
+            <p style="margin:3px 0 0;font-size:10px;color:#9E9E9E;">Lakes<br/>rejuvenated</p>
+          </td>
+          <td style="text-align:center;padding:0 4px;">
+            <p style="margin:0;font-size:18px;font-weight:700;color:#388E3C;">5,000+</p>
+            <p style="margin:3px 0 0;font-size:10px;color:#9E9E9E;">Volunteers<br/>engaged</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- SIGN OFF -->
+    <p style="margin:0;font-size:13px;color:#424242;line-height:1.7;">
+      With heartfelt gratitude,<br/>
+      <strong>The Forward Foundation Team</strong>
+    </p>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#1a1a1a;padding:18px 24px;text-align:center;">
+    <p style="margin:0 0 4px;color:#8BC34A;font-size:12px;font-weight:600;">theforwardfoundation.org</p>
+    <p style="margin:0 0 4px;color:#9E9E9E;font-size:11px;">theforwardfoundation2025@gmail.com</p>
+    <p style="margin:8px 0 0;color:#616161;font-size:10px;">This is an automated receipt. Please do not reply to this email.</p>
+  </div>
+
+</div>
+</body>
+</html>`;
 
   const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
