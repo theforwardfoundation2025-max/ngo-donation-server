@@ -40,7 +40,7 @@ async function sendEmail(d) {
 
   <!-- HEADER WITH LOGO -->
   <div style="background:#1a1a1a;padding:28px 24px;text-align:center;">
-    <img src="https://github.com/theforwardfoundation2025-max/ngo-donation-server/blob/main/logo.png"
+    <img src="https://theforwardfoundation.org/images/logo.png"
          style="height:70px;margin-bottom:8px;"
          alt="The Forward Foundation" />
     <p style="color:#8BC34A;margin:4px 0 0;font-size:12px;letter-spacing:1px;">LIVE | DEVELOP | SUSTAIN</p>
