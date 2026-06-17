@@ -18,22 +18,42 @@ app.post('/webhook/razorpay', async (req, res) => {
   if (event.event !== 'payment.captured') return res.status(200).send('Ignored');
 
   const p = event.payload.payment.entity;
-  console.log('FULL NOTES:', JSON.stringify(p.notes));
-  console.log('FULL PAYMENT:', JSON.stringify(p));
+
+  // ── DEBUG: Print ALL notes and fields to find exact key names ──
+  console.log('=== DEBUG START ===');
+  console.log('notes:', JSON.stringify(p.notes));
+  console.log('email:', p.email);
+  console.log('contact:', p.contact);
+  console.log('description:', p.description);
+  console.log('=== DEBUG END ===');
+
   const email   = p.email;
-  const name    = p.notes?.['Donor Full Name']     || p.notes?.['name']    || 'Valued Donor';
-  const pan     = p.notes?.['PAN for Tax Benefit'] || p.notes?.['pan']     || 'N/A';
-  const purpose = p.notes?.['Purpose']             || p.notes?.['purpose'] || 'General Donation';
+  const name    = p.notes?.['Donor Full Name']
+               || p.notes?.['donor_full_name']
+               || p.notes?.['name']
+               || p.notes?.['Name']
+               || p.notes?.['full_name']
+               || 'Valued Donor';
+
+  const pan     = p.notes?.['PAN for Tax Benefit']
+               || p.notes?.['pan_for_tax_benefit']
+               || p.notes?.['PAN']
+               || p.notes?.['pan']
+               || p.notes?.['Pan']
+               || 'N/A';
+
+  const purpose = p.notes?.['Purpose']
+               || p.notes?.['purpose']
+               || 'General Donation';
+
   const amount  = (p.amount / 100).toFixed(2);
   const payId   = p.id;
   const date    = new Date().toLocaleDateString('en-IN',
                     { day: '2-digit', month: 'long', year: 'numeric' });
 
-  // Receipt Number = TFF-YEAR-RAZORPAY_PAYMENT_ID
-  // Example: TFF-2026-pay_T2KFNubYWpAbEn
   const receiptNum = 'TFF-' + new Date().getFullYear() + '-' + payId;
 
-  console.log('Payment received:', { email, name, pan, purpose, amount, payId, receiptNum });
+  console.log('Extracted:', { email, name, pan, purpose, amount, payId, receiptNum });
 
   await sendEmail({ email, name, pan, purpose, amount, payId, date, receiptNum });
   res.status(200).send('OK');
@@ -175,7 +195,7 @@ async function sendEmail(d) {
       content: [
         {
           type: 'text/plain',
-          value: `Dear ${d.name}, Thank you for your donation of INR ${d.amount} to The Forward Foundation. Receipt No: ${d.receiptNum}. Payment ID: ${d.payId}. Date: ${d.date}. Donor Name: ${d.name}. PAN: ${d.pan}. Purpose: ${d.purpose}. This donation qualifies for Section 80G tax deduction. 80G Reg No: YOUR-80G-NUMBER-HERE.`
+          value: `Dear ${d.name}, Thank you for your donation of INR ${d.amount} to The Forward Foundation. Receipt No: ${d.receiptNum}. Payment ID: ${d.payId}. Date: ${d.date}. Donor Name: ${d.name}. PAN: ${d.pan}. Purpose: ${d.purpose}. This donation qualifies for Section 80G tax deduction.`
         },
         {
           type: 'text/html',
