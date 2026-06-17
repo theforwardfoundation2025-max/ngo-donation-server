@@ -17,24 +17,28 @@ app.post('/webhook/razorpay', async (req, res) => {
   const event = JSON.parse(req.body);
   if (event.event !== 'payment.captured') return res.status(200).send('Ignored');
 
-  const p       = event.payload.payment.entity;
+  const p = event.payload.payment.entity;
+
   const email   = p.email;
-  const name    = p.notes?.['Donor Full Name']     || 'Valued Donor';
-  const pan     = p.notes?.['PAN for Tax Benefit'] || 'N/A';
-  const purpose = p.notes?.['Purpose']             || 'General Donation';
+  const name    = p.notes?.['Donor Full Name']     || p.notes?.['name']    || 'Valued Donor';
+  const pan     = p.notes?.['PAN for Tax Benefit'] || p.notes?.['pan']     || 'N/A';
+  const purpose = p.notes?.['Purpose']             || p.notes?.['purpose'] || 'General Donation';
   const amount  = (p.amount / 100).toFixed(2);
   const payId   = p.id;
   const date    = new Date().toLocaleDateString('en-IN',
                     { day: '2-digit', month: 'long', year: 'numeric' });
 
-  await sendEmail({ email, name, pan, purpose, amount, payId, date });
+  // Receipt Number = TFF-YEAR-RAZORPAY_PAYMENT_ID
+  // Example: TFF-2026-pay_T2KFNubYWpAbEn
+  const receiptNum = 'TFF-' + new Date().getFullYear() + '-' + payId;
+
+  console.log('Payment received:', { email, name, pan, purpose, amount, payId, receiptNum });
+
+  await sendEmail({ email, name, pan, purpose, amount, payId, date, receiptNum });
   res.status(200).send('OK');
 });
 
 async function sendEmail(d) {
-
-  const LOGO_URL = 'https://theforwardfoundation.org/images/logo.png';
-  const receiptNum = 'TFF-' + new Date().getFullYear() + '-' + d.payId.slice(-6).toUpperCase();
 
   const html = `
 <!DOCTYPE html>
@@ -43,7 +47,9 @@ async function sendEmail(d) {
 <div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;">
 
   <div style="background:#1a1a1a;padding:28px 24px;text-align:center;">
-    <img src="${LOGO_URL}" style="height:70px;margin-bottom:8px;" alt="The Forward Foundation" />
+    <img src="https://theforwardfoundation.org/images/logo.png"
+         style="height:70px;margin-bottom:8px;"
+         alt="The Forward Foundation" />
     <p style="color:#8BC34A;margin:4px 0 0;font-size:12px;letter-spacing:1px;">LIVE | DEVELOP | SUSTAIN</p>
   </div>
 
@@ -65,7 +71,7 @@ async function sendEmail(d) {
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
         <tr style="border-bottom:1px solid #E0E0E0;">
           <td style="padding:10px 8px;color:#757575;width:45%;">Receipt Number</td>
-          <td style="padding:10px 8px;color:#212121;font-weight:600;">${receiptNum}</td>
+          <td style="padding:10px 8px;color:#212121;font-weight:600;font-family:monospace;font-size:11px;">${d.receiptNum}</td>
         </tr>
         <tr style="border-bottom:1px solid #E0E0E0;background:#ffffff;">
           <td style="padding:10px 8px;color:#757575;">Payment ID</td>
@@ -77,13 +83,17 @@ async function sendEmail(d) {
         </tr>
         <tr style="border-bottom:1px solid #E0E0E0;background:#ffffff;">
           <td style="padding:10px 8px;color:#757575;">Donor Name</td>
-          <td style="padding:10px 8px;color:#212121;">${d.name}</td>
+          <td style="padding:10px 8px;color:#212121;font-weight:600;">${d.name}</td>
         </tr>
         <tr style="border-bottom:1px solid #E0E0E0;">
-          <td style="padding:10px 8px;color:#757575;">PAN Number</td>
-          <td style="padding:10px 8px;color:#212121;font-family:monospace;">${d.pan}</td>
+          <td style="padding:10px 8px;color:#757575;">Email</td>
+          <td style="padding:10px 8px;color:#212121;">${d.email}</td>
         </tr>
         <tr style="border-bottom:1px solid #E0E0E0;background:#ffffff;">
+          <td style="padding:10px 8px;color:#757575;">PAN Number</td>
+          <td style="padding:10px 8px;color:#212121;font-family:monospace;font-weight:600;">${d.pan}</td>
+        </tr>
+        <tr style="border-bottom:1px solid #E0E0E0;">
           <td style="padding:10px 8px;color:#757575;">Purpose</td>
           <td style="padding:10px 8px;color:#212121;">${d.purpose}</td>
         </tr>
@@ -164,7 +174,7 @@ async function sendEmail(d) {
       content: [
         {
           type: 'text/plain',
-          value: `Dear ${d.name}, Thank you for your donation of INR ${d.amount} to The Forward Foundation. Payment ID: ${d.payId}. Date: ${d.date}. Receipt No: TFF-${new Date().getFullYear()}-${d.payId.slice(-6).toUpperCase()}. PAN: ${d.pan}. Purpose: ${d.purpose}. This donation qualifies for Section 80G tax deduction.`
+          value: `Dear ${d.name}, Thank you for your donation of INR ${d.amount} to The Forward Foundation. Receipt No: ${d.receiptNum}. Payment ID: ${d.payId}. Date: ${d.date}. Donor Name: ${d.name}. PAN: ${d.pan}. Purpose: ${d.purpose}. This donation qualifies for Section 80G tax deduction. 80G Reg No: YOUR-80G-NUMBER-HERE.`
         },
         {
           type: 'text/html',
@@ -175,7 +185,7 @@ async function sendEmail(d) {
   });
 
   if (response.ok) {
-    console.log('Email sent successfully to', d.email);
+    console.log('Email sent to', d.email, '| Receipt:', d.receiptNum);
   } else {
     const err = await response.text();
     console.error('SendGrid error:', err);
