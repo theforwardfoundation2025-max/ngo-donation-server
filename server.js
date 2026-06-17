@@ -167,7 +167,7 @@ async function sendEmail(d) {
     body: JSON.stringify({
       personalizations: [{ to: [{ email: d.email, name: d.name }] }],
       from: { email: process.env.EMAIL_USER, name: 'The Forward Foundation' },
-      subject: 'Thank You for Your Donation — Receipt Enclosed',
+      subject: `Donation Receipt - The Forward Foundation - ${d.date},
       content: [{ type: 'text/html', value: html }],
     }),
   });
