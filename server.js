@@ -145,7 +145,7 @@ async function sendEmail(d) {
 
   <div style="background:#1a1a1a;padding:18px 24px;text-align:center;">
     <p style="margin:0 0 4px;color:#8BC34A;font-size:12px;font-weight:600;">theforwardfoundation.org</p>
-    <p style="margin:0 0 4px;color:#9E9E9E;font-size:11px;">theforwardfoundation2025@gmail.com</p>
+    <p style="margin:0 0 4px;color:#9E9E9E;font-size:11px;">team@theforwardfoundation.org</p>
     <p style="margin:8px 0 0;color:#616161;font-size:10px;">This is an automated receipt. Please do not reply to this email.</p>
   </div>
 
