@@ -158,7 +158,7 @@ async function sendEmail(d) {
 </body>
 </html>`;
 
-  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+ const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
@@ -167,8 +167,17 @@ async function sendEmail(d) {
     body: JSON.stringify({
       personalizations: [{ to: [{ email: d.email, name: d.name }] }],
       from: { email: process.env.EMAIL_USER, name: 'The Forward Foundation' },
-      subject: `Donation Receipt - The Forward Foundation - ${d.date},
-      content: [{ type: 'text/html', value: html }],
+      subject: `Donation Receipt - The Forward Foundation - ${d.date}`,
+      content: [
+        {
+          type: 'text/plain',
+          value: `Dear ${d.name}, Thank you for your donation of INR ${d.amount} to The Forward Foundation. Payment ID: ${d.payId}. Date: ${d.date}. This donation qualifies for Section 80G tax deduction.`
+        },
+        {
+          type: 'text/html',
+          value: html
+        }
+      ],
     }),
   });
 
