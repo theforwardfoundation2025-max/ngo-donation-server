@@ -18,7 +18,8 @@ app.post('/webhook/razorpay', async (req, res) => {
   if (event.event !== 'payment.captured') return res.status(200).send('Ignored');
 
   const p = event.payload.payment.entity;
-
+  console.log('FULL NOTES:', JSON.stringify(p.notes));
+  console.log('FULL PAYMENT:', JSON.stringify(p));
   const email   = p.email;
   const name    = p.notes?.['Donor Full Name']     || p.notes?.['name']    || 'Valued Donor';
   const pan     = p.notes?.['PAN for Tax Benefit'] || p.notes?.['pan']     || 'N/A';
